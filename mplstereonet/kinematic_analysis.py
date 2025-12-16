@@ -329,7 +329,11 @@ class PlanarSliding(object):
 
         # Get the failure zones (as shapely polygons) from geometry interaction
         sliding_zone = daylight_envelope.difference(friction_cone)
-        split_polys = ops.split(sliding_zone,lat_lim1)
+        try:
+            split_polys = ops.split(sliding_zone,lat_lim1).geoms
+        except AttributeError:
+            split_polys = ops.split(sliding_zone,lat_lim1)
+
         sec_zone_present = len(split_polys)==2
         if sec_zone_present:
             if split_polys[0].intersects(lat_lim2):
@@ -337,7 +341,11 @@ class PlanarSliding(object):
             else:
                 sec_zone1, sliding_zone = split_polys
 
-            split_polys = ops.split(sliding_zone,lat_lim2)
+            try:
+                split_polys = ops.split(sliding_zone,lat_lim2).geoms
+            except AttributeError:
+                split_polys = ops.split(sliding_zone,lat_lim2)
+
             if split_polys[0].touches(sec_zone1):
                 sliding_zone, sec_zone2 = split_polys
             else:
@@ -739,8 +747,15 @@ class FlexuralToppling(object):
             lat_lim2 = _shape('plane', strike=90-self.latlim, dip=90)
 
         # Get the failure zones (as shapely polygons) from geometry interaction
-        sec_zone1, toppling_zone = ops.split(envelope, lat_lim1)
-        toppling_zone, sec_zone2 = ops.split(toppling_zone, lat_lim2)
+        try:
+            sec_zone1, toppling_zone = ops.split(envelope, lat_lim1).geoms
+        except AttributeError:
+            sec_zone1, toppling_zone = ops.split(envelope, lat_lim1)
+
+        try:
+            toppling_zone, sec_zone2 = ops.split(toppling_zone, lat_lim2).geoms
+        except AttributeError:
+            toppling_zone, sec_zone2 = ops.split(toppling_zone, lat_lim2)
 
         # Plotting
         if ax==None:
